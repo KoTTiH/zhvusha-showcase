@@ -1,12 +1,12 @@
 # Обзор Архитектуры
 
 ZHVUSHA - personal-agent codebase вокруг одного центрального orchestration loop
-и нескольких body layers с ограниченными capabilities.
+и нескольких исполняющих слоев с ограниченными capabilities.
 
-Ключевое архитектурное решение: tools не становятся независимыми assistants.
-Они возвращают structured observations, proposals, artifacts и errors. Главный
-orchestrator отвечает за user-facing synthesis, follow-up decisions и memory
-updates.
+Ключевое решение: tools, skills и workers не становятся независимыми
+ассистентами. Они возвращают structured observations, proposals, artifacts и
+errors. Главный orchestrator отвечает за ответ пользователю, follow-up decisions
+и memory updates.
 
 English version is available below.
 
@@ -26,11 +26,11 @@ Telegram / operator message
 
 ## Core Boundaries
 
-- `src/llm` - LLM gateway. Остальные модули идут через tiers и не hardcode-ят
-  provider adapters.
+- `src/llm` - LLM gateway. Остальные модули идут через tiers и provider
+  registry, а не hardcode-ят конкретные adapters.
 - `src/memory` - episodic memory, consolidation и staging. Background processes
   предлагают memory candidates вместо прямого изменения private memory.
-- `src/knowledge` - external knowledge storage и MCP-facing access.
+- `src/knowledge` - external knowledge storage и MCP-facing access layer.
 - `src/agent_runtime` - durable jobs, profiles, capability declarations, worker
   routing и tool-gateway enforcement.
 - `src/skills` - bounded user-facing capabilities. Skills проходят общий
@@ -40,11 +40,11 @@ Telegram / operator message
 
 ## Safety Model
 
-Публичный срез сохраняет основной инженерный принцип private system:
-read-only work по умолчанию, side effects только через explicit capability и
-approval paths.
+Публичный срез сохраняет основной инженерный принцип private system: read-only
+work по умолчанию, side effects только через explicit capability и approval
+paths.
 
-Примеры side effects, которые должны оставаться gated:
+Side effects, которые должны оставаться gated:
 
 - запись файлов;
 - изменение environment values;
@@ -54,11 +54,11 @@ approval paths.
 - restart services;
 - commit или push code.
 
-Границы удерживаются тестами и `import-linter` contracts.
+Границы удерживаются тестами, `import-linter` contracts и CI.
 
 ## Testing Strategy
 
-В репозитории есть широкая test suite. Самые полезные для ревью зоны:
+Самые полезные для ревью зоны тестов:
 
 - agent runtime models и job lifecycle;
 - capability graph и invocation profiles;
@@ -68,17 +68,20 @@ approval paths.
 - Telegram/bot mode separation;
 - safety и approval gates.
 
-Full production-like verification требует реальные local services и credentials,
-которые намеренно не включены в публичный срез.
+Полная production-like verification требует реальные local services и
+credentials, которые намеренно не включены в публичный срез.
+
+---
 
 ## English
 
 ZHVUSHA is a personal-agent codebase built around one central orchestration loop
-and several capability-scoped body layers.
+and several execution layers with scoped capabilities.
 
-The important design choice is that tools do not become independent assistants.
-They return structured observations, proposals, artifacts and errors. The main
-orchestrator owns user-facing synthesis, follow-up decisions and memory updates.
+The important design choice is that tools, skills and workers do not become
+independent assistants. They return structured observations, proposals,
+artifacts and errors. The main orchestrator owns user-facing synthesis,
+follow-up decisions and memory updates.
 
 ## Runtime Flow
 
@@ -96,8 +99,8 @@ Telegram / operator message
 
 ## Core Boundaries
 
-- `src/llm` is the LLM gateway. Other modules route through tiers and do not
-  hardcode provider adapters.
+- `src/llm` is the LLM gateway. Other modules route through tiers and the
+  provider registry instead of hardcoding provider adapters.
 - `src/memory` owns episodic memory, consolidation and staging. Background
   processes propose memory candidates instead of mutating private memory
   directly.
@@ -125,13 +128,12 @@ Examples of side effects that must stay gated:
 - restarting services;
 - committing or pushing code.
 
-The codebase uses both tests and `import-linter` contracts to keep these
+The codebase uses tests, `import-linter` contracts and CI to keep these
 boundaries visible.
 
 ## Testing Strategy
 
-The repository contains a broad test suite. The most relevant tests for review
-are contract and boundary tests around:
+The most relevant tests for review are contract and boundary tests around:
 
 - agent runtime models and job lifecycle;
 - capability graph and invocation profiles;
