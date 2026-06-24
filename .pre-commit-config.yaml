@@ -1,0 +1,67 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: detect-private-key
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.22.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.1
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # mypy runs via uv to share the project venv (deps are not installed in
+  # the pre-commit mirrors-mypy isolated venv, which caused import-not-found
+  # on anthropic/sqlalchemy/etc). `mypy src/` — not tests/ — because the
+  # pyproject.toml mypy overrides for tests.* relax strictness which the
+  # hook was not honoring.
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy strict (src/)
+        entry: uv run mypy src/ --strict
+        language: system
+        pass_filenames: false
+        types_or: [python]
+
+  # === v4 hooks (KB #82) ===
+  - repo: local
+    hooks:
+      - id: import-linter
+        name: import-linter (v4 module isolation)
+        entry: uv run lint-imports --config .importlinter
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: tier3-protection
+        name: tier3 protection (v4)
+        entry: scripts/check_tier3_protection.sh
+        language: system
+        pass_filenames: true
+        always_run: true
+
+      - id: whitelist-check
+        name: whitelist check (Phase 13 — Жвуша spec gate)
+        entry: scripts/check_whitelist.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: contract-tests
+        name: contract tests (v4, pytest -m contract)
+        entry: uv run pytest -m contract -x --tb=short --no-cov
+        language: system
+        pass_filenames: false
+        files: ^(src/|tests/)

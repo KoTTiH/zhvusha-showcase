@@ -1,0 +1,35 @@
+name: proposal_command
+description: "Manage proposals/*.md Tier 3 proposals via /proposal"
+version: "0.1.0"
+type: inline
+
+llm_tier: worker
+
+triggers:
+  - "/proposal"
+
+cost_estimate: low
+approval_policy: auto
+
+side_effects:
+  - reads_filesystem
+  - writes_filesystem
+  - sends_telegram_message
+
+mode_tags:
+  - personal
+
+modifies: []
+
+parameters: {}
+
+dependencies:
+  skills:
+    - src.skills.spec_command.parser
+
+source: manual
+created_at: "2026-05-07"
+
+tests:
+  contract: tests/skills/proposal_command/test_skill.py
+  behaviour: tests/skills/proposal_command/test_store.py

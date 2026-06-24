@@ -1,0 +1,20 @@
+name: weather
+description: "Hard-coded weather stub for /weather <city>"
+version: "0.1.0"
+type: inline
+llm_tier: worker
+triggers:
+  - "/weather"
+cost_estimate: low
+approval_policy: auto
+side_effects: []
+mode_tags:
+  - personal
+modifies: []
+parameters: {}
+dependencies: {}
+source: manual
+status: disabled
+disabled_reason: "Calibration stub is intentionally not wired into bot startup."
+tests:
+  contract: tests/skills/weather/test_contract.py

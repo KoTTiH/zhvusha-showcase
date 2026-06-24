@@ -1,0 +1,50 @@
+name: delegate
+description: "Delegate tasks to Codex"
+version: "1.0.0"
+type: delegated
+
+llm_tier: strategist
+
+triggers:
+  - "/delegate"
+
+cost_estimate: high
+approval_policy: required  # delegated work — always requires approval
+
+side_effects:
+  - delegates_to_code_agent
+  - calls_llm
+  - calls_llm_tier_strategist
+  - network_io_external
+  - sends_telegram_message
+  - spawns_subprocess
+
+mode_tags:
+  - personal
+
+modifies: []
+
+executor: codex_cli
+max_duration_seconds: 300  # mirrors default of Settings.delegate_timeout_seconds
+
+# Delegation caps (KB #90). Validated by SafetyGuard at runtime
+# once phase 8 Safety module enforces the check — ignored by Pydantic
+# manifest validator today, but required in the file for forward
+# compatibility.
+delegation_caps:
+  max_invocations_per_hour: 3
+  max_invocations_per_day: 20
+  required_trigger_type: human
+
+parameters: {}  # runtime knobs come from src.core.config.Settings (delegate_*)
+
+dependencies:
+  leaf_modules: []
+  skills: []
+
+source: manual
+created_at: "2026-04-18"
+
+tests:
+  contract: tests/skills/delegate/test_contract.py
+  integration: tests/skills/delegate/test_integration.py

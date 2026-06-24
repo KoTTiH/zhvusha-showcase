@@ -1,0 +1,255 @@
+[importlinter]
+root_packages =
+    src
+
+[importlinter:contract:leaf_modules_isolation]
+name = Leaf modules must not depend on capability modules
+type = forbidden
+source_modules =
+    src.utils
+    src.embeddings
+    src.research
+    src.news
+    src.pillars
+forbidden_modules =
+    src.llm
+    src.memory
+    src.skills
+    src.personality
+    src.daemon
+    src.bot
+    src.knowledge
+    src.core
+
+[importlinter:contract:llm_gateway_isolation]
+name = LLM Gateway internals only accessible via protocols.py / router.py
+type = forbidden
+source_modules =
+    src.bot
+    src.collectors
+    src.core
+    src.daemon
+    src.knowledge
+    src.memory
+    src.personality
+    src.skills
+forbidden_modules =
+    src.llm.anthropic_api
+    src.llm.base
+    src.llm.claude_cli
+    src.llm.gemini
+    src.llm.openai_compatible
+    src.llm.openrouter
+    src.llm.providers
+ignore_imports =
+    # Router consumes the gateway's private adapters/registry — that's
+    # the whole point of the facade.
+    src.llm.router -> src.llm.base
+    src.llm.router -> src.llm.gemini
+    src.llm.router -> src.llm.providers
+    src.llm.router -> src.monitoring.usage_tracker
+    # The provider registry wires adapters lazily through factories.
+    src.llm.providers -> src.llm.anthropic_api
+    src.llm.providers -> src.llm.base
+    src.llm.providers -> src.llm.claude_cli
+    src.llm.providers -> src.llm.gemini
+    src.llm.providers -> src.llm.openai_compatible
+    src.llm.providers -> src.llm.openrouter
+    # Adapters share the BaseLLMAdapter abstract class.
+    src.llm.claude_cli -> src.llm.base
+    src.llm.anthropic_api -> src.llm.base
+    src.llm.gemini -> src.llm.base
+    src.llm.openai_compatible -> src.llm.base
+    src.llm.openrouter -> src.llm.base
+    # Monitoring reads the registry for pricing / emoji — read-only,
+    # no isolation breach.
+    src.monitoring.usage_tracker -> src.llm.providers
+    src.monitoring.dashboard -> src.llm.providers
+
+[importlinter:contract:knowledge_isolation]
+name = Knowledge Base internals only accessible via src.knowledge package
+type = forbidden
+source_modules =
+    src.bot
+    src.daemon
+    src.memory
+    src.personality
+    src.skills
+forbidden_modules =
+    src.knowledge.store
+    src.knowledge.manager
+    src.knowledge.models
+ignore_imports =
+    src.knowledge -> src.knowledge.store
+    src.knowledge -> src.knowledge.manager
+# Package __init__.py intentionally re-exports KnowledgeStore and
+# KnowledgeManager from their implementation modules — this is the only
+# approved edge that touches the forbidden modules. Breaking either
+# ignored edge severs every indirect path from a source module to a
+# forbidden implementation (store.py → models.py included, since it
+# can only be reached via store).
+
+[importlinter:contract:memory_isolation]
+name = Memory internals only accessible via src.memory package
+type = forbidden
+source_modules =
+    src.bot
+    src.collectors
+    src.core
+    src.daemon
+    src.knowledge
+    src.personality
+    src.skills
+forbidden_modules =
+    src.memory.episodic
+    src.memory.people
+    src.memory.desires
+    src.memory.domain
+    # phase 5C additions — full consolidation / enrichment chain
+    src.memory.consolidation
+    src.memory.consolidation_lock
+    src.memory.sonnet_enricher
+    src.memory.learning_staging
+    src.memory.staging_parser
+    src.memory.importance
+    src.memory.types
+    src.memory.pipelines.enrichment
+    # phase 5D additions — ORM internals encapsulated
+    src.memory.database._models
+    src.memory.database._engine
+# Scope note (after phase 5D):
+#   Memory module is fully encapsulated. The `src.memory.database`
+#   package itself stays PUBLIC — legitimate shared-infra clients import
+#   `Base` (daemon/knowledge ORM model definitions, alembic env metadata
+#   discovery), `get_engine` / `get_session_maker` (mcp_server, daemon
+#   init, bot main, migration scripts), and `Episode` / `EpisodeORM`
+#   (mcp_server.dashboard_api SQL queries, alembic, tests, scripts).
+#   Internal ORM files `_models.py` and `_engine.py` are FORBIDDEN —
+#   no external client may import them directly.
+ignore_imports =
+    # Package __init__.py re-exports public API (approved edges)
+    src.memory -> src.memory.episodic
+    src.memory -> src.memory.people
+    src.memory -> src.memory.desires
+    src.memory -> src.memory.consolidation
+    src.memory -> src.memory.consolidation_lock
+    src.memory -> src.memory.sonnet_enricher
+    src.memory -> src.memory.learning_staging
+    src.memory -> src.memory.types
+    # protocols.py re-exports detect_domain from domain.py and types from types.py
+    src.memory.protocols -> src.memory.domain
+    src.memory.protocols -> src.memory.types
+    # sonnet_enricher re-exports EnrichmentResult/LearningSignal from types
+    # (backwards-compat alias while tests migrate off the sonnet_enricher path)
+    src.memory.sonnet_enricher -> src.memory.types
+    # sonnet_enricher delegates to the enrichment pipeline internally
+    src.memory.sonnet_enricher -> src.memory.pipelines.enrichment
+    # enrichment pipeline uses shared types
+    src.memory.pipelines.enrichment -> src.memory.types
+    # episodic uses EnrichmentResult via TYPE_CHECKING
+    src.memory.episodic -> src.memory.types
+    # consolidation uses staging_parser and upper-tier modules internally
+    src.memory.consolidation -> src.memory.episodic
+    src.memory.consolidation -> src.memory.people
+    src.memory.consolidation -> src.memory.staging_parser
+    # learning_staging uses LearningSignal from types (TYPE_CHECKING)
+    src.memory.learning_staging -> src.memory.types
+    # database package __init__ re-exports internals (approved edges) — 5D
+    src.memory.database -> src.memory.database._models
+    src.memory.database -> src.memory.database._engine
+
+[importlinter:contract:personality_isolation]
+name = Personality internals only accessible via src.personality package
+type = forbidden
+source_modules =
+    src.bot
+    src.collectors
+    src.core
+    src.daemon
+    src.knowledge
+    src.memory
+    src.skills
+forbidden_modules =
+    src.personality.affective_state
+    src.personality.constants
+    src.personality.emotion_atlas
+    src.personality.evolution
+    src.personality.guard
+    src.personality.homeostasis
+ignore_imports =
+    # Package __init__.py re-exports public API (approved edges)
+    src.personality -> src.personality.affective_state
+    src.personality -> src.personality.constants
+    src.personality -> src.personality.emotion_atlas
+    src.personality -> src.personality.evolution
+    src.personality -> src.personality.guard
+    src.personality -> src.personality.homeostasis
+    # protocols.py re-exports EmotionConcept from emotion_atlas
+    src.personality.protocols -> src.personality.emotion_atlas
+    # Internal cohesion: affective_state needs the emotion atlas + protocols
+    src.personality.affective_state -> src.personality.emotion_atlas
+    src.personality.affective_state -> src.personality.protocols
+    src.personality.evolution -> src.personality.protocols
+    src.personality.homeostasis -> src.personality.protocols
+# Scope note (after phase 6):
+#   Personality module is encapsulated. Public clients import from
+#   `src.personality` package (façade) or `src.personality.protocols`
+#   (type hints). Internal modules are FORBIDDEN externally.
+#
+#   Boundaries deferred to later phases:
+#     * core/decision.py — DecisionEngine has mixed concerns (DI of
+#       PersonalityEvolution + runtime-imports affective_state and
+#       PERSONALITY_COMPACT). Splitting requires re-architecting the
+#       decision pipeline; defer to phase 7+ when chat_response also
+#       moves.
+#     * core/capabilities.py — CapabilityRegistry used by bot.main and
+#       skills.chat_response. Logically closer to Skills than
+#       Personality; defer to phase 7 (Skills extraction).
+
+[importlinter:contract:daemon_isolation]
+name = Daemon internals only accessible via build_daemon / run_daemon entry points
+type = forbidden
+source_modules =
+    src.skills
+    src.personality
+    src.memory
+    src.knowledge
+    src.collectors
+    src.core
+forbidden_modules =
+    src.daemon.safety
+    src.daemon.sleep_agent
+    src.daemon.audit
+    src.daemon.pending_action
+    src.daemon.decision
+    src.daemon.stream
+    src.daemon.signals
+    src.daemon.ticker
+    src.daemon.producers
+    src.daemon.tools
+# Scope note (phase 8):
+#   Daemon is a thin scheduler. Its public entry points live in
+#   src.daemon.main (build_daemon / run_daemon / ZhvushaDaemon). All
+#   internal submodules (safety, sleep_agent, audit, pending_action,
+#   decision, stream, signals, ticker, producers, tools/*) are FORBIDDEN
+#   externally from the layers listed above. Bot is intentionally not
+#   listed — the bot process owns daemon lifecycle (approval dispatch,
+#   wake signalling) and legitimately reaches for pending_action / stream.
+
+[importlinter:contract:layered_architecture]
+name = Lower layers must not depend on higher layers (v4 target state)
+type = layers
+layers =
+    src.bot : src.mcp_server
+    src.daemon : src.skills
+    src.memory : src.personality : src.knowledge
+    src.llm
+    src.utils : src.embeddings
+# Phase-1 grandfathered violations have all been resolved. See
+# v4-known-violations.txt for history.
+# Phase 7.3: removed src.skills.workspace_session.skill -> src.bot.utils
+# (_split_text moved to src.utils.text — no longer a layer violation).
+# Phase 7.4: removed src.skills.chat_response.skill -> src.bot.middleware
+# (log_bot_response now injected via constructor callback).
+# Phase 8:   removed src.memory.people -> src.skills.workspace_session.workspace
+# (get_workspace_path call inlined as Path(...).expanduser().resolve()).

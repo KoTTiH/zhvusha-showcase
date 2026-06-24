@@ -1,0 +1,28 @@
+Source-Available Portfolio License
+
+Copyright (c) 2026 Nikita Okhrimets
+
+This repository is published for portfolio review, educational reading and
+architecture evaluation.
+
+You may:
+- read the source code;
+- clone the repository for local review;
+- run the code locally for non-commercial evaluation;
+- quote small excerpts with attribution.
+
+You may not, without prior written permission:
+- redistribute this software as a product or service;
+- use it commercially;
+- publish a modified copy as your own project;
+- remove attribution;
+- use included names, branding or project identity to imply endorsement.
+
+No production credentials, private data, Telegram sessions, database dumps or
+runtime artifacts are included in this public snapshot.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM USE OF
+THIS SOFTWARE.

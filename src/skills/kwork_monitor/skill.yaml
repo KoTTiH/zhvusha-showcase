@@ -1,0 +1,96 @@
+name: kwork_monitor
+description: "Monitors Kwork project exchange for relevant projects"
+version: "1.0.0"
+type: background
+
+llm_tier: analyst
+
+# Triggers document the commands routed via kwork_router (handlers.py).
+# BackgroundSkill never matches via can_handle — these are the adjacent
+# aiogram message handlers that interact with the polling skill instance.
+triggers:
+  - "/kwork"
+  - "/kwork_status"
+  - "/sleep"
+  - "/wake"
+
+cost_estimate: medium
+approval_policy: auto
+
+side_effects:
+  - reads_from_kb
+  - writes_to_kb
+  - calls_llm
+  - sends_telegram_message
+  - network_io_external
+  - modifies_memory
+
+mode_tags:
+  - personal
+
+modifies: []
+
+trigger_type: interval
+trigger_config:
+  interval_seconds: 600  # default — overridden by poll_interval_seconds parameter
+
+parameters:
+  poll_interval_seconds:
+    default: 600
+    description: "Пауза между циклами опроса биржи Kwork. Меньше = свежее данные, но чаще запросы к API и выше риск rate-limit."
+    type: int
+    min: 60
+    max: 3600
+    env_override: KWORK_POLL_INTERVAL_SECONDS
+
+  seen_ttl_seconds:
+    default: 604800  # 7 days
+    description: "Сколько секунд помнить уже просмотренные проекты в Redis. По истечении TTL проект может снова показаться как новый."
+    type: int
+    min: 3600
+    max: 2592000
+
+  default_sleep_hours:
+    default: 8
+    description: "Длительность стартового sleep-режима и сна по умолчанию для команды /sleep без аргумента."
+    type: int
+    min: 1
+    max: 24
+
+  min_budget:
+    default: 5000
+    description: "Минимальный бюджет проекта в рублях для фильтра. Проекты с бюджетом ниже игнорируются полностью."
+    type: int
+    min: 0
+    env_override: KWORK_MIN_BUDGET
+
+  max_offers:
+    default: 30
+    description: "Максимальное число уже поданных откликов на проект. Если откликов больше — проект игнорируется как перенасыщенный."
+    type: int
+    min: 0
+    max: 100
+    env_override: KWORK_MAX_OFFERS
+
+  keywords:
+    default: []
+    description: "Список ключевых слов для deterministic матчинга заголовков проектов. Заголовок должен содержать любое слово."
+    type: list
+    env_override: KWORK_KEYWORDS
+
+  redis_seen_key:
+    default: "kwork:seen"
+    description: "Redis ключ для set'а просмотренных ID проектов. Менять только при namespace conflict или миграции Redis."
+    type: str
+    tier: 2
+
+dependencies:
+  leaf_modules: []
+  skills: []
+
+source: manual
+created_at: "2026-04-18"
+
+tests:
+  contract: tests/skills/kwork_monitor/test_contract.py
+  integration: tests/skills/kwork_monitor/test_integration.py

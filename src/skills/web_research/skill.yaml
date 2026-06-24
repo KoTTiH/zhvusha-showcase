@@ -1,0 +1,35 @@
+name: web_research
+description: "Read-only web research через Agent Runtime"
+version: "0.1.0"
+type: inline
+
+llm_tier: worker
+
+triggers:
+  - "/web_research"
+
+cost_estimate: low
+approval_policy: auto
+
+side_effects:
+  - network_io_external
+  - delegates_to_other_agent
+
+mode_tags:
+  - personal
+
+modifies: []
+
+parameters: {}
+
+dependencies:
+  leaf_modules:
+    - src.skills.web_research.skill
+    - src.agent_runtime.workers.web
+    - src.agent_runtime.builtin_tools
+
+source: manual
+status: experimental
+
+tests:
+  behaviour: tests/skills/web_research/test_skill.py

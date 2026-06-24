@@ -1,0 +1,59 @@
+name: autonomous_self_coding
+description: "Autonomous self-work loop that improves Жвуша through gated self-coding"
+version: "0.1.0"
+type: background
+
+llm_tier: strategist
+
+triggers: []
+
+cost_estimate: high
+approval_policy: auto
+
+side_effects:
+  - delegates_to_code_agent
+  - calls_llm
+  - calls_llm_tier_strategist
+  - reads_filesystem
+  - writes_filesystem
+  - spawns_subprocess
+  - network_io_external
+
+mode_tags:
+  - personal
+
+modifies: []
+
+trigger_type: interval
+trigger_config:
+  seconds: 21600
+
+parameters:
+  enabled:
+    default: false
+    description: "Enable scheduled autonomous self-coding cycles."
+    type: bool
+    env_override: AUTONOMOUS_SELF_CODING_ENABLED
+    tier: 2
+  max_tier:
+    default: 3
+    description: "Highest spec tier Жвуша may self-approve."
+    type: int
+    min: 0
+    max: 3
+    env_override: AUTONOMOUS_SELF_CODING_MAX_TIER
+    tier: 3
+
+dependencies:
+  modules:
+    - src.agent_runtime
+    - src.skills.ideation_to_spec
+    - src.skills.implement_spec
+    - src.skills.spec_command
+
+source: manual
+created_at: "2026-05-12"
+
+tests:
+  contract: tests/skills/autonomous_self_coding/test_skill.py
+  runtime: tests/agent_runtime/test_self_improvement_worker.py

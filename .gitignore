@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.venv/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# Local agent/operator settings
+.mcp.local.json
+.agent/
+.agents/
+.codex/
+.claude/
+.claude/settings.local.json
+.claude/local.md
+.claude/scheduled_tasks.lock
+
+# Data
+*.db
+*.sqlite
+*.session
+*.session-journal
+*.dump
+*.pem
+*.key
+*.crt
+
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# v4 refactor scaffolding — temporary, gitignored
+v4-known-violations.txt
+
+# Scratch / log files used during local development.
+log.md
+scratch.md
+scratch.*
+*.log
+
+# Runtime artifacts.
+.agent_runtime/
+data/goal_loop/
+data/
+logs/
+
+# Local binary installers and manual check artifacts.
+check/
+check/*.exe

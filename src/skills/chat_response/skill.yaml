@@ -1,0 +1,48 @@
+name: chat_response
+description: "Conversational responses in chat"
+version: "1.0.0"
+type: inline
+
+llm_tier: analyst
+
+# chat_response is the catch-all conversational fallback — it has no
+# deterministic command triggers. Dispatch is score-based via can_handle().
+triggers: []
+
+cost_estimate: medium
+approval_policy: auto
+
+side_effects:
+  - calls_llm
+  - reads_from_kb
+  - writes_workspace
+  - reads_workspace
+  - sends_telegram_message
+  - modifies_memory
+
+mode_tags:
+  - personal
+  - assistant
+  - social
+
+modifies: []
+
+parameters:
+  chat_agentic_timeout_seconds:
+    type: float
+    default: 300.0
+    min: 1
+    description: "Hard timeout for personal agentic chat response generation."
+    env_override: CHAT_AGENTIC_TIMEOUT_SECONDS
+
+dependencies:
+  leaf_modules: []
+  skills:
+    - channel_writer
+
+source: manual
+created_at: "2026-04-18"
+
+tests:
+  contract: tests/skills/chat_response/test_contract.py
+  integration: tests/skills/chat_response/test_integration.py

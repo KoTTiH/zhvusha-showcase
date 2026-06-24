@@ -1,0 +1,38 @@
+name: morning_digest
+description: "Формирует утренний digest по topic backlog"
+version: "0.1.0"
+type: background
+
+llm_tier: worker
+
+triggers: []
+
+cost_estimate: low
+approval_policy: auto
+
+side_effects:
+  - reads_filesystem
+
+mode_tags:
+  - personal
+
+modifies: []
+
+trigger_type: cron
+trigger_config:
+  hour: 8
+  timezone: Europe/Moscow
+
+parameters: {}
+
+dependencies:
+  modules:
+    - src.news
+    - src.pillars
+
+source: manual
+created_at: "2026-05-07"
+
+tests:
+  contract: tests/skills/morning_digest/test_skill.py
+  behaviour: tests/skills/morning_digest/test_formatter.py

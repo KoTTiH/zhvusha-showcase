@@ -1,0 +1,38 @@
+name: telegram_mcp_personal
+description: "Personal Telegram account actions through Agent Runtime MCP bridge and intent router"
+version: "1.0.0"
+type: inline
+
+llm_tier: analyst
+
+triggers:
+  - "/telegram_send "
+  - "/telegram_read "
+
+cost_estimate: low
+approval_policy: required
+
+side_effects:
+  - sends_telegram_message
+  - delegates_to_other_agent
+  - network_io_external
+
+mode_tags:
+  - personal
+
+modifies: []
+
+parameters: {}
+
+dependencies:
+  leaf_modules:
+    - src.agent_runtime
+    - src.llm
+  skills: []
+
+source: manual
+created_at: "2026-05-13"
+
+tests:
+  contract: tests/skills/telegram_mcp_personal/test_skill.py
+  integration: tests/agent_runtime/test_telegram_mcp_worker.py

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "zhvusha-knowledge": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "src.mcp_server"]
+    },
+    "telegram-mcp-personal": {
+      "command": "uv",
+      "args": ["run", "python", "scripts/run_telegram_mcp.py"]
+    }
+  }
+}
