@@ -1,0 +1,55 @@
+name: implement_spec
+description: "Editor: run approved tasks/<slug>.yaml spec via Codex"
+version: "0.1.0"
+type: delegated
+
+llm_tier: strategist
+
+triggers:
+  - "/spec_run"
+  - "/implement_spec"
+
+cost_estimate: high
+approval_policy: required
+
+side_effects:
+  - delegates_to_code_agent
+  - calls_llm
+  - calls_llm_tier_strategist
+  - reads_filesystem
+  - writes_filesystem
+  - reads_from_kb
+  - spawns_subprocess
+  - network_io_external
+
+mode_tags:
+  - personal
+
+modifies: []
+
+# Optional delegation caps — disabled by default in config. When enabled,
+# caps are run-wise, not request-wise (one /spec_run = one invocation; the
+# backend may make many internal tool calls but the cap counts at the cycle
+# boundary).
+parameters: {}
+
+dependencies:
+  leaf_modules:
+    - src.skills.spec_command.parser
+    - src.skills.spec_command.store
+  skills: []
+
+executor: codex_cli
+max_duration_seconds: 600.0
+
+source: manual
+created_at: "2026-04-26"
+
+tests:
+  contract: tests/skills/implement_spec/test_skill.py
+  unit_caps: tests/skills/implement_spec/test_caps_enforcer.py
+  unit_branch_manager: tests/skills/implement_spec/test_branch_manager.py
+  unit_commit_runner: tests/skills/implement_spec/test_commit_runner.py
+  unit_dry_run: tests/skills/implement_spec/test_dry_run.py
+  unit_hooks: tests/skills/implement_spec/test_hooks.py
+  unit_sdk_runner: tests/skills/implement_spec/test_sdk_runner.py

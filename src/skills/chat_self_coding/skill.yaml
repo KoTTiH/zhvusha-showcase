@@ -1,0 +1,54 @@
+name: chat_self_coding
+description: "Чат-режим кода — /код или /code для входа, обычный текст внутри"
+version: "0.1.0"
+type: inline
+
+llm_tier: worker
+
+triggers:
+  - "/код"
+  - "/code"
+  - "/самокодинг"
+  - "/self_coding"
+
+cost_estimate: low
+approval_policy: auto
+
+side_effects:
+  - reads_from_kb
+  - reads_workspace
+  - writes_workspace
+  - reads_filesystem
+  - writes_filesystem
+  - calls_llm
+  - sends_telegram_message
+  - modifies_memory
+
+mode_tags:
+  - personal
+
+modifies: []
+
+parameters: {}
+
+dependencies:
+  leaf_modules:
+    - src.skills.chat_self_coding.intent_classifier
+    - src.skills.chat_self_coding.state
+    - src.skills.chat_self_coding.blocks
+    - src.skills.chat_self_coding.translator
+    - src.skills.chat_self_coding.events
+    - src.skills.chat_self_coding.attachments
+  skills:
+    - chat_response
+    - code_agent
+    - ideation_to_spec
+    - implement_spec
+    - spec_command
+
+source: manual
+created_at: "2026-04-27"
+
+tests:
+  contract: tests/skills/chat_self_coding/test_skill.py
+  behaviour: tests/skills/chat_self_coding/test_skill.py

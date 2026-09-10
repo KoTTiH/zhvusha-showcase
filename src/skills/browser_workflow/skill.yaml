@@ -1,0 +1,36 @@
+name: browser_workflow_draft
+description: "Browser workflow draft через Agent Runtime"
+version: "0.1.0"
+type: inline
+
+llm_tier: worker
+
+triggers:
+  - "/browser_workflow_draft"
+
+cost_estimate: low
+approval_policy: auto
+
+side_effects:
+  - network_io_external
+  - delegates_to_other_agent
+  - writes_filesystem
+
+mode_tags:
+  - personal
+
+modifies: []
+
+parameters: {}
+
+dependencies:
+  leaf_modules:
+    - src.skills.browser_workflow.skill
+    - src.agent_runtime.workers.browser_workflow
+    - src.agent_runtime.builtin_tools
+
+source: manual
+status: experimental
+
+tests:
+  behaviour: tests/skills/browser_workflow/test_skill.py

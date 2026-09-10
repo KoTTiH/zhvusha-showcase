@@ -1,0 +1,28 @@
+name: external_skill_acquisition
+description: "Search and import external skill candidates through scoped approval"
+version: "0.1.0"
+type: inline
+llm_tier: worker
+triggers:
+  - "/external_skill_search"
+  - "/external_skill_import"
+  - "/external_skill_approve_readonly"
+  - "/external_skill_approve_execution"
+  - "/external_skill_mark_native"
+cost_estimate: low
+approval_policy: required
+side_effects:
+  - reads_filesystem
+  - writes_filesystem
+  - network_io_external
+mode_tags:
+  - personal
+modifies: []
+parameters: {}
+dependencies:
+  internal:
+    - src.skills.external_skill_loader
+source: manual
+status: experimental
+tests:
+  contract: tests/skills/external_skill_acquisition/test_acquisition_skill.py

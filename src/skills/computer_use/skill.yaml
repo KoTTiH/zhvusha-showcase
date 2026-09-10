@@ -1,0 +1,34 @@
+name: computer_use
+description: "Live browser and GUI actions через Agent Runtime"
+version: "0.1.0"
+type: inline
+
+llm_tier: worker
+
+triggers:
+  - "/computer_use"
+
+cost_estimate: low
+approval_policy: auto
+
+side_effects:
+  - network_io_external
+  - delegates_to_other_agent
+
+mode_tags:
+  - personal
+
+modifies: []
+
+parameters: {}
+
+dependencies:
+  leaf_modules:
+    - src.skills.computer_use.skill
+    - src.agent_runtime.computer_use
+
+source: manual
+status: experimental
+
+tests:
+  behaviour: tests/skills/computer_use/test_skill.py

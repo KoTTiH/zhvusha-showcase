@@ -1,0 +1,21 @@
+name: adversarial_test_gen
+version: "0.1.0"
+type: inline
+description: Generate anchored adversarial tests from archive
+llm_tier: worker
+triggers:
+  - "/adversarial_tests"
+cost_estimate: low
+approval_policy: auto
+side_effects:
+  - reads_filesystem
+mode_tags:
+  - personal
+modifies: []
+dependencies:
+  internal:
+    - src.archive
+    - src.skills.base
+tests:
+  contract: tests/skills/adversarial_test_gen/test_skill.py
+  behaviour: tests/skills/adversarial_test_gen/test_generator.py
